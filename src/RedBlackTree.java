@@ -3,7 +3,6 @@
  */
 public class RedBlackTree extends Node {
 
-
     public RedBlackTree(Integer value) {
         super(value);
     }
@@ -141,6 +140,13 @@ public class RedBlackTree extends Node {
      */
     public String toDOT() {
         //output function in DOT format.
+        return "";
+    }
+    public String rbtNodeToDot(Node rbtNode) {
+        //this-value
+        //parent-value
+        //childLeft-value
+        //childRight-value
         return "";
     }
 }
