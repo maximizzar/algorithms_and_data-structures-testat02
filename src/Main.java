@@ -20,14 +20,15 @@ public class Main {
             maxRandomNumber = scanner.nextInt();
         }
 
-        outputRedBlackTreeWithRandomElements(elementCount,seed,maxRandomNumber);
+        System.out.println(outputRedBlackTreeWithRandomElements(elementCount,seed,maxRandomNumber));
     }
-    public static void outputRedBlackTreeWithRandomElements(Integer elementCount,
+    public static String outputRedBlackTreeWithRandomElements(Integer elementCount,
                                                              Integer seed,
                                                              Integer maxRandomNumber) {
 
         BitSet alreadySeen = new BitSet(maxRandomNumber);
         Random random = new Random(seed);
+        StringBuilder stringBuilder = new StringBuilder();
 
         Integer value = random.nextInt(maxRandomNumber) + 1;
         RedBlackTree tree = new RedBlackTree(value);
@@ -43,9 +44,11 @@ public class Main {
                 tree.insertNode(value);
             }
         }
-        System.out.println("digraph RBTree {");
-        tree.toDOT(tree.root);
-        System.out.println("\tnil [style = filled, fillcolor = black, fontcolor = white];");
-        System.out.println("}");
+        stringBuilder.append("digraph RBTree {").append("\n");
+        tree.toDOT(tree.root,stringBuilder);
+        stringBuilder.append("\tnil [style = filled, fillcolor = black, fontcolor = white];")
+                .append("\n")
+                .append("}");
+        return stringBuilder.toString();
     }
 }

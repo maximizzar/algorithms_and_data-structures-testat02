@@ -241,27 +241,52 @@ public class RedBlackTree extends Node {
     public String toString() {
         return "";
     }
-    public void toDOT(Node node) {
+    public String toDOT(Node node, StringBuilder stringBuilder) {
         //output function in DOT format.
 
         if (node.isColorRed()) { // coloring
-            System.out.println("\t" + node.getValue() + " [style = filled, fillcolor = red];");
+            stringBuilder.append("\t")
+                    .append(node.getValue())
+                    .append(" [style = filled, fillcolor = red];")
+                    .append("\n");
         } else {
-            System.out.println("\t" + node.getValue() + " [style = filled, fillcolor = black, fontcolor = white];");
+            stringBuilder.append("\t")
+                    .append(node.getValue())
+                    .append(" [style = filled, fillcolor = black, fontcolor = white];")
+                    .append("\n");
         }
 
         if (node.getChildLeft() != null) {
-            System.out.println("\t" + node.getValue() + " -> " + node.getChildLeft().getValue() + " [label = \" left\"];");
-            toDOT(node.getChildLeft());
+            stringBuilder.append("\t")
+                    .append(node.getValue())
+                    .append(" -> ")
+                    .append(node.getChildLeft().getValue())
+                    .append(" [label = \" left\"];")
+                    .append("\n");
+
+            toDOT(node.getChildLeft(),stringBuilder);
         } else {
-            System.out.println("\t" + node.getValue() + " -> nil [label = \" left\"];");
+            stringBuilder.append("\t")
+                    .append(node.getValue())
+                    .append(" -> nil [label = \" left\"];")
+                    .append("\n");
         }
 
         if (node.getChildRight() != null) {
-            System.out.println("\t" + node.getValue() + " -> " + node.getChildRight().getValue() + " [label = \" right\"];");
-            toDOT(node.getChildRight());
+            stringBuilder.append("\t")
+                    .append(node.getValue())
+                    .append(" -> ")
+                    .append(node.getChildRight().getValue())
+                    .append(" [label = \" right\"];")
+                    .append("\n");
+
+            toDOT(node.getChildRight(),stringBuilder);
         } else {
-            System.out.println("\t" + node.getValue() + " -> nil [label = \" right\"];");
+            stringBuilder.append("\t")
+                    .append(node.getValue())
+                    .append(" -> nil [label = \" right\"];")
+                    .append("\n");
         }
+        return stringBuilder.toString();
     }
 }
