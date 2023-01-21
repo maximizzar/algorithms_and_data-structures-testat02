@@ -43,6 +43,9 @@ public class Main {
                 tree.insertNode(value);
             }
         }
-        tree.toDOT();
+        System.out.println("digraph RBTree {");
+        tree.toDOT(tree.root);
+        System.out.println("\tnil [style = filled, fillcolor = black, fontcolor = white];");
+        System.out.println("}");
     }
 }

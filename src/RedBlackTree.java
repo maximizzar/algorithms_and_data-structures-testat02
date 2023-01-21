@@ -59,168 +59,209 @@ class Node {
         this.color = false;
     }
 }
-
 public class RedBlackTree extends Node {
 
     public RedBlackTree(Integer value) {
         super(value);
     }
-
-    //operations on red-black tree
-    public void insertNode(Integer value) {
-        Node rbtNode = root;
+    public void insertNode(int key) {
+        Node node = root;
         Node parent = null;
 
-        while (rbtNode != null) {
-            parent = rbtNode;
-
-            if (value < rbtNode.getValue()) rbtNode = rbtNode.getChildLeft();
-            else if (value > rbtNode.getValue()) rbtNode = rbtNode.getChildRight();
-            else throw new IllegalArgumentException("node with key already present! " + value);
+        // Traverse the tree to the left or right depending on the key
+        while (node != null) {
+            parent = node;
+            if (key < node.getValue()) {
+                node = node.getChildLeft();
+            } else if (key > node.getValue()) {
+                node = node.getChildRight();
+            } else {
+                throw new IllegalArgumentException("BST already contains a node with key " + key);
+            }
         }
 
-        Node newRbtNode = new Node(value);
-        newRbtNode.setColorRed();
-
-        if (parent == null) root = newRbtNode;
-        else if (value < parent.getValue()) parent.setChildLeft(newRbtNode);
-        else parent.setChildRight(newRbtNode);
-        newRbtNode.setParent(parent);
-        fixRBTPropertiesInsert(newRbtNode);
-    }
-
-    //rotations on red-black tree
-    public void rotateLeft(Node rbtNode) {
-        Node parent = rbtNode.getParent();
-        Node rightChild = rbtNode.getChildRight();
-
-        rbtNode.setChildRight(rightChild.getChildLeft());
-        if (rightChild.getChildLeft() != null) {
-            rightChild.getChildLeft().setParent(rbtNode);
-        }
-        rightChild.setChildLeft(rightChild);
-        rbtNode.setParent(rightChild);
-
-        replaceParentsChild(parent, rbtNode, rightChild);
-    }
-
-    public void rotateRight(Node rbtNode) {
-        Node parent = rbtNode.getParent();
-        Node leftChild = rbtNode.getChildLeft();
-
-        rbtNode.setChildLeft(leftChild.getChildRight());
-        if (leftChild.getChildRight() != null) {
-            leftChild.getChildRight().setParent(rbtNode);
-        }
-        leftChild.setChildRight(rbtNode);
-        rbtNode.setParent(leftChild);
-
-        replaceParentsChild(parent, rbtNode, leftChild);
-    }
-
-    public void replaceParentsChild(Node parent, Node oldChild, Node newChild) {
-        if (java.util.Objects.equals(parent, null)) root = newChild;
-        else if (java.util.Objects.equals(parent.getChildLeft(), oldChild)) parent.setChildLeft(newChild);
-        else if (java.util.Objects.equals(parent.getChildRight(), parent)) parent.setChildRight(newChild);
-        else throw new IllegalStateException("Node is not a child of its parent");
-
-        if (newChild != null) newChild.setParent(parent);
-    }
-
-    //helper methods
-    private void fixRBTPropertiesInsert(Node rbtNode) {
-        Node parent = rbtNode.getParent();
-
+        // Insert new node
+        Node newNode = new Node(key);
+        newNode.setColorRed();
         if (parent == null) {
-            rbtNode.setColorBlack();
-            return; //Parent is null, the end of the recursion
+            root = newNode;
+        } else if (key < parent.getValue()) {
+            parent.setChildLeft(newNode);
+        } else {
+            parent.setChildRight(newNode);
         }
-        if (parent.isColorBlack()) return;
+        newNode.setParent(parent);
 
-        //if parent is red
-        Node grandparent = parent.getParent(); //Frisisch: greandparten
+        fixRedBlackPropertiesAfterInsert(newNode);
+    }
 
+    @SuppressWarnings("squid:S125") // Ignore SonarCloud complains about commented code line 70.
+    private void fixRedBlackPropertiesAfterInsert(Node node) {
+        Node parent = node.getParent();
+
+        // Case 1: Parent is null, we've reached the root, the end of the recursion
+        if (parent == null) {
+            // Uncomment the following line if you want to enforce black roots (rule 2):
+            node.setColorBlack();
+            return;
+        }
+
+        // Parent is black --> nothing to do
+        if (parent.isColorBlack()) {
+            return;
+        }
+
+        // From here on, parent is red
+        Node grandparent = parent.getParent();
+
+        // Case 2:
+        // Not having a grandparent means that parent is the root. If we enforce black roots
+        // (rule 2), grandparent will never be null, and the following if-then block can be
+        // removed.
         if (grandparent == null) {
+            // As this method is only called on red nodes (either on newly inserted ones - or -
+            // recursively on red grandparents), all we have to do is to recolor the root black.
             parent.setColorBlack();
             return;
         }
-        Node RtheFruitDude;
-        Node LtheFruitDude;
-        //theFruitDude either nil or black
-        if (grandparent.getChildLeft() == parent.getParent()) {
-            RtheFruitDude = grandparent.getChildRight();
-            if (grandparent.getChildRight() == parent.getParent()) {
-                LtheFruitDude = grandparent.getChildLeft();
 
+        // Get the uncle (may be null/nil, in which case its color is BLACK)
+        Node uncle = getUncle(parent);
 
-                //Right-Uncle is red
-                if (RtheFruitDude != null && RtheFruitDude.isColorRed()) {
-                    parent.setColorBlack();
-                    grandparent.setColorRed();
-                    RtheFruitDude.setColorBlack();
+        // Case 3: Uncle is red -> recolor parent, grandparent and uncle
+        if (uncle != null && uncle.isColorRed()) {
+            parent.setColorBlack();
+            grandparent.setColorRed();
+            uncle.setColorBlack();
 
-                    //recoloring grandparent may break RBTProperties
-                    fixRBTPropertiesInsert(grandparent);
-
-                }
-                //Left-Uncle is red
-                if (LtheFruitDude != null && LtheFruitDude.isColorRed()) {
-                    parent.setColorBlack();
-                    grandparent.setColorRed();
-                    LtheFruitDude.setColorBlack();
-
-                    //recoloring grandparent may break RBTProperties
-                    fixRBTPropertiesInsert(grandparent);
-
-                } else if (parent == grandparent.getChildLeft()) { //Parent is left child of grandparent
-                    if (rbtNode == parent.getChildRight()) {
-                        rotateLeft(parent);
-                        parent = rbtNode;
-                    }
-                    rotateRight(grandparent);
-
-                    //the former parent and grandparent
-                    parent.setColorBlack();
-                    grandparent.setColorRed();
-
-                } else { //Parent is right child of grandparent
-                    if (rbtNode == parent.getChildLeft()) {
-                        rotateRight(parent);
-
-                        parent = rbtNode;
-                    }
-
-                    rotateLeft(grandparent);
-
-                    //the former parent and grandparent
-                    parent.setColorBlack();
-                    grandparent.setColorRed();
-                }
-
-            }
+            // Call recursively for grandparent, which is now red.
+            // It might be root or have a red parent, in which case we need to fix more...
+            fixRedBlackPropertiesAfterInsert(grandparent);
         }
+
+        // Note on performance:
+        // It would be faster to do the uncle color check within the following code. This way
+        // we would avoid checking the grandparent-parent direction twice (once in getUncle()
+        // and once in the following else-if). But for better understanding of the code,
+        // I left the uncle color check as a separate step.
+
+        // Parent is left child of grandparent
+        else if (parent == grandparent.getChildLeft()) {
+            // Case 4a: Uncle is black and node is left->right "inner child" of its grandparent
+            if (node == parent.getChildRight()) {
+                rotateLeft(parent);
+
+                // Let "parent" point to the new root node of the rotated sub-tree.
+                // It will be recolored in the next step, which we're going to fall-through to.
+                parent = node;
+            }
+
+            // Case 5a: Uncle is black and node is left->left "outer child" of its grandparent
+            rotateRight(grandparent);
+
+            // Recolor original parent and grandparent
+            parent.setColorBlack();
+            grandparent.setColorRed();
+        }
+
+        // Parent is right child of grandparent
+        else {
+            // Case 4b: Uncle is black and node is right->left "inner child" of its grandparent
+            if (node == parent.getChildLeft()) {
+                rotateRight(parent);
+
+                // Let "parent" point to the new root node of the rotated sub-tree.
+                // It will be recolored in the next step, which we're going to fall-through to.
+                parent = node;
+            }
+
+            // Case 5b: Uncle is black and node is right->right "outer child" of its grandparent
+            rotateLeft(grandparent);
+
+            // Recolor original parent and grandparent
+            parent.setColorBlack();
+            grandparent.setColorRed();
+        }
+    }
+    private Node getUncle(Node parent) {
+        Node grandparent = parent.getParent();
+        if (grandparent.getChildLeft() == parent) {
+            return grandparent.getChildRight();
+
+        } else if (grandparent.getChildRight() == parent) {
+            return grandparent.getChildLeft();
+        } else {
+            throw new IllegalStateException("Parent is not a child of its grandparent");
+        }
+    }
+    private void rotateRight(Node node) {
+        Node parent = node.getParent();
+        Node leftChild = node.getChildLeft();
+
+        node.setChildLeft(leftChild.getChildRight());
+        if (leftChild.getChildRight() != null) {
+            leftChild.getChildRight().setParent(node);
+        }
+
+        leftChild.setChildRight(node);
+        node.setParent(leftChild);
+
+        replaceParentsChild(parent, node, leftChild);
+    }
+    private void rotateLeft(Node node) {
+        Node parent = node.getParent();
+        Node rightChild = node.getChildRight();
+
+        node.setChildRight(rightChild.getChildLeft());
+        if (rightChild.getChildLeft() != null) {
+            rightChild.getChildLeft().setParent(node);
+        }
+
+        rightChild.setChildLeft(node);
+        node.setParent(rightChild);
+
+        replaceParentsChild(parent, node, rightChild);
+    }
+    private void replaceParentsChild(Node parent, Node oldChild, Node newChild) {
+        if (parent == null) {
+            root = newChild;
+        } else if (parent.getChildLeft() == oldChild) {
+            parent.setChildLeft(newChild);
+        } else if (parent.getChildRight() == oldChild) {
+            parent.setChildRight(newChild);
+        } else {
+            throw new IllegalStateException("Node is not a child of its parent");
+        }
+
+        if (newChild != null) {
+            newChild.setParent(parent);
+        }
+    }
+
+    public String toString() {
+        return "";
     }
     public void toDOT(Node node) {
         //output function in DOT format.
 
-        if (node.color == RED) { // coloring
-            System.out.println("\t" + node.data + " [style = filled, fillcolor = red];");
+        if (node.isColorRed()) { // coloring
+            System.out.println("\t" + node.getValue() + " [style = filled, fillcolor = red];");
         } else {
-            System.out.println("\t" + node.data + " [style = filled, fillcolor = black, fontcolor = white];");
+            System.out.println("\t" + node.getValue() + " [style = filled, fillcolor = black, fontcolor = white];");
         }
 
-        if (node.left != null) {
-            System.out.println("\t" + node.getData() + " -> " + node.left.getData() + " [label = \" left\"];");
-            toDOT(node.left);
+        if (node.getChildLeft() != null) {
+            System.out.println("\t" + node.getValue() + " -> " + node.getChildLeft().getValue() + " [label = \" left\"];");
+            toDOT(node.getChildLeft());
         } else {
-            System.out.println("\t" + node.getData() + " -> nil [label = \" left\"];");
+            System.out.println("\t" + node.getValue() + " -> nil [label = \" left\"];");
         }
 
-        if (node.right != null) {
-            System.out.println("\t" + node.getData() + " -> " + node.right.getData() + " [label = \" right\"];");
-            toDOT(node.right);
+        if (node.getChildRight() != null) {
+            System.out.println("\t" + node.getValue() + " -> " + node.getChildRight().getValue() + " [label = \" right\"];");
+            toDOT(node.getChildRight());
         } else {
-            System.out.println("\t" + node.data + " -> nil [label = \" right\"];");
+            System.out.println("\t" + node.getValue() + " -> nil [label = \" right\"];");
         }
     }
 }
