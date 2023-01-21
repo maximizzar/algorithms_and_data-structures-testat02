@@ -241,7 +241,7 @@ public class RedBlackTree extends Node {
     public String toString() {
         return "";
     }
-    public String toDOT(Node node, StringBuilder stringBuilder) {
+    public void toDOT(Node node, StringBuilder stringBuilder) {
         //output function in DOT format.
 
         if (node.isColorRed()) { // coloring
@@ -287,6 +287,5 @@ public class RedBlackTree extends Node {
                     .append(" -> nil [label = \" right\"];")
                     .append("\n");
         }
-        return stringBuilder.toString();
     }
 }
