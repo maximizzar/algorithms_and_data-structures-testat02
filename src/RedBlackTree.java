@@ -223,6 +223,4 @@ public class RedBlackTree extends Node {
             System.out.println("\t" + node.data + " -> nil [label = \" right\"];");
         }
     }
-
-
 }
