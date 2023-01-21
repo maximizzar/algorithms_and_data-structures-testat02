@@ -125,7 +125,6 @@ public class RedBlackTree extends Node {
 
     private Node getTheFruitDude(Node parent) {
         Node grandparent = parent.getParent().getParent();
-
         if(grandparent.getChildLeft() == parent.getParent()) return grandparent.getChildRight();
         else if (grandparent.getChildRight() == parent.getParent()) return grandparent.getChildLeft();
         throw new IllegalStateException("Parent is not a child of its grandparent");
