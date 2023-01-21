@@ -200,9 +200,29 @@ public class RedBlackTree extends Node {
             }
         }
     }
-                public String toDot() {
-                return null;
-                }
+    public void toDOT(Node node) {
+        //output function in DOT format.
+
+        if (node.color == RED) { // coloring
+            System.out.println("\t" + node.data + " [style = filled, fillcolor = red];");
+        } else {
+            System.out.println("\t" + node.data + " [style = filled, fillcolor = black, fontcolor = white];");
+        }
+
+        if (node.left != null) {
+            System.out.println("\t" + node.getData() + " -> " + node.left.getData() + " [label = \" left\"];");
+            toDOT(node.left);
+        } else {
+            System.out.println("\t" + node.getData() + " -> nil [label = \" left\"];");
+        }
+
+        if (node.right != null) {
+            System.out.println("\t" + node.getData() + " -> " + node.right.getData() + " [label = \" right\"];");
+            toDOT(node.right);
+        } else {
+            System.out.println("\t" + node.data + " -> nil [label = \" right\"];");
+        }
+    }
 
 
 }
