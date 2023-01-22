@@ -1,16 +1,14 @@
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Random;
 import java.util.BitSet;
 
 public class Main {
     public static void main(String[] args) {
-        FileWriter fileWriter;
-        Integer elementCount,seed,maxRandomNumber;
-            elementCount = 15;
-            seed = 1337;
-            maxRandomNumber = 100;
-
+        Integer elementCount = 15,seed = 1337,maxRandomNumber = 100;
+        
         try {
             outputRBTWithRandomElements(elementCount,seed,maxRandomNumber);
         } catch (IOException e) {
@@ -24,8 +22,10 @@ public class Main {
         StringBuilder stringBuilder;
         FileWriter fileWriter;
 
-        Integer value = random.nextInt(maxRandomNumber) + 1;
-        RedBlackTree tree = new RedBlackTree(value);
+        int value = random.nextInt(maxRandomNumber) + 1;
+        RedBlackTree redBlackTree = new RedBlackTree(value);
+
+        Files.createDirectories(Path.of("rbt/"));
 
         for (int i = 0; i < elementCount;) {
             value = random.nextInt(maxRandomNumber);
@@ -33,19 +33,22 @@ public class Main {
             if (alreadySeen.get(value)) continue;
 
             stringBuilder = new StringBuilder();
-            String path = "rbt/" + i + ".dot";
+            String path = "rbt/" + (i + 1) + ".dot";
             fileWriter = new FileWriter(path);
 
             alreadySeen.set(value); i++;
-            tree.insertNode(value);
+            redBlackTree.insertNode(value);
 
-            roundHeadingComment(stringBuilder, i);
-            currentDotDiagram(stringBuilder, tree);
+            roundHeadingComment(stringBuilder, (i + 1));
+            currentDotDiagram(stringBuilder, redBlackTree);
 
             fileWriter.write(stringBuilder.toString());
+            System.out.println(stringBuilder);
             fileWriter.close();
         }
     }
+
+    //Extracted code
     private static void currentDotDiagram(StringBuilder stringBuilder, RedBlackTree tree) {
         stringBuilder.append("digraph RBTree {").append("\n");
         tree.toDOT(tree.root, stringBuilder);
@@ -53,7 +56,7 @@ public class Main {
                 .append("\n")
                 .append("}").append("\n\n");
     }
-    private static void roundHeadingComment(StringBuilder stringBuilder, int i) {
+    private static void roundHeadingComment(StringBuilder stringBuilder, Integer i) {
         stringBuilder.append("// ")
                 .append(" ".repeat(16))
                 .append(" round: ").append(i)
